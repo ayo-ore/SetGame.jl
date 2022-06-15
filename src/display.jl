@@ -33,7 +33,7 @@ const PAD_MAP = Dict{Count,Int}(
 )
 
 const CHAR_MAP = Dict{Shade,Char}(
-    Solid => '@', Dashed => '/', Empty => '⋅'
+    Solid => '@', Dashed => 'o', Empty => '⋅'
 )
 
 function get_pixels(c::Card)

@@ -32,6 +32,7 @@ Base.@kwdef struct GameContext
     selected::BitVector = falses(15)
     found::Vector{NTuple{3,Card}} = []
     start_time::DateTime = now()
+    complete::BitVector = falses(1)
 end
 
 # deck generator
@@ -93,20 +94,23 @@ function replace_cards!(board::Vector{Card}, deck::Vector{Card}, mask::A)::Vecto
 end
 replace_cards!(ctx::GameContext) = replace_cards!(ctx.board, ctx.deck, view(ctx.selected, 1:length(ctx.board)))
 
+# function selected(ctx::GameContext)
+#
+# end
+
 const KEYMAP = [
     'q', 'a', 'z', 'w', 's', 'x', 'e', 'd', 'c', 'r', 'f', 'v', 't', 'g', 'b'
 ]
 
-function timer(start::DateTime)::Nothing
-    @async begin
-        while true
-            println(Dates.format(
-                Time(Nanosecond(now() - start)),
-                "MM:SS"
-            ))
-            sleep(1)
-        end
+function run_timer(ctx)
+    while true
+        render_screen(ctx)
+        sleep(1)
     end
+end
+
+function get_gametime(ctx::GameContext)::String
+    Dates.format(Time(Nanosecond(now() - start)), "MM:SS")
 end
 
 function playset!()
@@ -118,6 +122,8 @@ function playset!()
 
     draw_cards!(ctx, 12)
 
+    @async run_timer(ctx)
+
     enableRawMode(terminal)
     while true
 
@@ -127,9 +133,9 @@ function playset!()
             if !hasset(ctx.board)
                 # end game if the deck is empty or draw 3 more cards
                 if isempty(ctx.deck)
+                    ctx.complete .= true
                     print("Game over")
                     break
-                    # TODO: Add game timing
                 else
                     draw_cards!(ctx, 3)
                 end
@@ -137,8 +143,10 @@ function playset!()
             end
         end
 
-        render_screen(ctx)
+        empty!(ctx.deck)
         
+        render_screen(ctx)
+
         # handle key input
         key = readKey(terminal.in_stream)
         chr = Char(key)
@@ -150,7 +158,6 @@ function playset!()
 
         # when three cards are selected, check if they are a set
         if sum(ctx.selected) == 3
-            # selected_trio = ctx.board[ctx.selected[1:length(ctx.board)]]
             selected_trio = view(ctx.board, view(ctx.selected, 1:length(ctx.board)))
         
             if isset(selected_trio...)
@@ -167,11 +174,7 @@ function playset!()
             end
             ctx.selected .= false # clear selections
         end
-
-        # println("CARDS LEFT: $(length(board))")
-        # println("SETS FOUND: $(length(found))")
     end
     disableRawMode(terminal)
-
     return nothing
 end
