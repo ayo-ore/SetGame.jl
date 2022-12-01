@@ -5,3 +5,8 @@ A terminal-based implementation of the card game [_SET_](https://en.wikipedia.or
 ```[sh]
 $ julia --project=. -e "using SetGame; playset!()"
 ```
+
+## Preview
+<p align="center">
+<img src="assets/preview.png" alt="preview" width="400"/>
+</p>
