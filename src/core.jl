@@ -134,7 +134,7 @@ function playset!()
                 # end game if the deck is empty or draw 3 more cards
                 if isempty(ctx.deck)
                     ctx.complete .= true
-                    print("Game over")
+                    println("You won!")
                     break
                 else
                     draw_cards!(ctx, 3)
@@ -142,8 +142,6 @@ function playset!()
                 check_for_set = false
             end
         end
-
-        empty!(ctx.deck)
         
         render_screen(ctx)
 
